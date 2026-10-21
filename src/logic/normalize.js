@@ -1,5 +1,8 @@
 export function normalizeWord(str) {
-    str = str.toUpperCase();
-    str = str.normalize("NFD")
-    str = str.replace("Œ", "OE");
+    return str
+        .toUpperCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") 
+        .replace(/Œ/g, "OE")             
+        .replace(/œ/g, "OE");         
 }
