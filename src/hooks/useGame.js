@@ -1,7 +1,6 @@
 import { useReducer, useEffect } from 'react';
 import { gameReducer, initialGameState, ACTIONS } from '../logic/gameReducer.js';
 import { getRandomWord } from '../logic/randomWord.js';
-// (Tu pourras importer ta liste de mots plus tard)
 
 export function useGame(wordList) {
   const [state, dispatch] = useReducer(gameReducer, initialGameState);

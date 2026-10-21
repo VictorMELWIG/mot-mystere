@@ -1,4 +1,8 @@
 import { evaluateGuess } from './evaluateGuess.js';
+import { isValidWord } from './validateGuessWord.js';
+import { normalizeWord } from './normalize.js';
+import allowedWords from '../data/mots_solutions.json';
+
 // Les actions possibles dans le jeu
 export const ACTIONS = {
   ADD_LETTER: 'ADD_LETTER',
@@ -13,6 +17,7 @@ export const initialGameState = {
   guesses: [],        // Les mots déjà validés (ex: ['ARBRE', 'LIVRE'])
   currentGuess: '',   // La ligne en cours (ex: 'CHAT')
   gameStatus: 'IN_PROGRESS', // 'IN_PROGRESS', 'WON', 'LOST'
+  errorMessage: '',   // Message affiché si le mot est refusé
 };
 
 // La fonction reducer qui met à jour l'état selon l'action
@@ -23,20 +28,26 @@ export function gameReducer(state, action) {
       if (state.currentGuess.length >= 5) return state;
       return {
         ...state,
-        currentGuess: state.currentGuess + action.payload,
+        currentGuess: state.currentGuess + normalizeWord(action.payload),
+        errorMessage: '',
       };
 
     case ACTIONS.DELETE_LETTER:
       return {
         ...state,
         currentGuess: state.currentGuess.slice(0, -1), // Supprime la dernière lettre
+        errorMessage: '',
       };
 
     // Validation de la proposition (quand le joueur appuie sur Entrée)
     case ACTIONS.SUBMIT_GUESS: {
-      // 1. Vérifier que le mot a bien 5 lettres
-      if (state.currentGuess.length !== 5) {
-        return state; 
+      // On ne peut plus jouer si la partie est terminée
+      if (state.gameStatus !== 'IN_PROGRESS') return state;
+
+      // 1. Vérifier que le mot est valide (5 lettres + présent dans la liste)
+      const validation = isValidWord(state.currentGuess, allowedWords);
+      if (!validation.valid) {
+        return { ...state, errorMessage: validation.reason };
       }
 
       // 2. Évaluer la proposition avec ta fonction evaluateGuess
@@ -57,18 +68,20 @@ export function gameReducer(state, action) {
       return {
         ...state,
         guesses: newGuesses,
-        currentGuess: '', 
+        currentGuess: '',
         gameStatus: newGameStatus,
+        errorMessage: '',
       };
     }
 
     case ACTIONS.SET_WORD:
       return {
         ...state,
-        targetWord: action.payload, // On met à jour le mot mystère
+        targetWord: normalizeWord(action.payload), // On met à jour le mot mystère (en majuscules, sans accents)
         guesses: [],                // On remet les essais à vide pour une nouvelle partie
         gameStatus: 'IN_PROGRESS',  // On remet le statut en cours
         currentGuess: '',           // On vide la ligne en cours
+        errorMessage: '',
       };
 
     default:
