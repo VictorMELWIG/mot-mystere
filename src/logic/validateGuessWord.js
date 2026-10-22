@@ -1,9 +1,10 @@
 import { normalizeWord } from './normalize.js';
+import { WORD_LENGTH } from '../constants.js';
 
-export function isValidWord(guess, allowedWordsList) {
-  // 1. Vérifier que le mot fait exactement 5 lettres
-  if (!guess || guess.length !== 5) {
-    return { valid: false, reason: "Le mot doit faire 5 lettres." };
+export function isValidWord(guess, allowedWordsList, wordLength = WORD_LENGTH) {
+  // 1. Vérifier que le mot a le bon nombre de lettres
+  if (!guess || guess.length !== wordLength) {
+    return { valid: false, reason: `Le mot doit faire ${wordLength} lettres.` };
   }
 
   // 2. Vérifier si le mot est dans la liste autorisée (si la liste est fournie)
