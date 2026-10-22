@@ -1,15 +1,30 @@
-//c'est le point de départ de l'appli
-//ça affiche App dans la div "root" de index.html
-//BrowserRouter c'est pour React Router, pour avoir plusieurs pages avec chacune son adresse
+//le point de départ de l'appli : l'en-tête commun et la liste des pages avec leur adresse
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router";
-import App from "./App.jsx";
+import { BrowserRouter, Routes, Route, Link } from "react-router";
+import { HomePage, RulesPage, NotFoundPage } from "./pages/Pages.jsx";
+import GamePage from "./pages/GamePage.jsx";
+// import { ScoresPage, StatsPage } from "./pages/Pages.jsx"; //désactivé tant que personne enregistre les parties
+// import { DailyPage } from "./pages/GamePage.jsx"; //désactivé tant que useGame sait pas faire le mot du jour
 import "./styles/index.css";
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <header className="header">
+        <Link to="/" className="logo">Le Mot Mystère</Link>
+      </header>
+      <main className="content">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/partie" element={<GamePage />} />
+          <Route path="/regles" element={<RulesPage />} />
+          {/* <Route path="/scores" element={<ScoresPage />} /> désactivé, voir en haut */}
+          {/* <Route path="/stats" element={<StatsPage />} /> désactivé, voir en haut */}
+          {/* <Route path="/jour" element={<DailyPage />} /> désactivé, voir en haut */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
     </BrowserRouter>
   </StrictMode>
 );

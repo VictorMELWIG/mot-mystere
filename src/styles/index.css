@@ -1,0 +1,519 @@
+/*tout le style du jeu : les bases, l'en-tête, les pages, la grille, le clavier et l'écran de fin*/
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ffffff;
+  color: #1a1a1b;
+}
+
+h1,
+h2 {
+  margin: 0 0 10px 0;
+}
+
+button { /*les boutons verts de tout le jeu*/
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #6aaa64;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5a9454;
+}
+
+button:disabled {
+  background-color: #b5b5b5;
+  cursor: default;
+}
+
+input { /*le champ du pseudo*/
+  font-family: inherit;
+  font-size: 16px;
+  padding: 10px;
+  border: 2px solid #d3d6da;
+  border-radius: 6px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #878a8c;
+}
+
+.error {
+  color: #d93025;
+  font-weight: bold;
+}
+
+.green {
+  color: #6aaa64;
+  font-weight: bold;
+}
+
+.yellow {
+  color: #c9b458;
+  font-weight: bold;
+}
+
+.grey {
+  color: #787c7e;
+  font-weight: bold;
+}
+
+.header { /*l'en-tête avec le nom du jeu*/
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  border-bottom: 1px solid #d3d6da;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #1a1a1b;
+  text-decoration: none;
+}
+
+.content { /*la page en dessous, pas trop large et centrée*/
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+.button-link { /*les liens qui ressemblent à des boutons*/
+  display: inline-block;
+  padding: 10px 20px;
+  border: 2px solid #d3d6da;
+  border-radius: 6px;
+  color: #1a1a1b;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.button-link:hover {
+  background-color: #f2f2f2;
+}
+
+.home {
+  text-align: center;
+  padding-top: 30px;
+}
+
+.home h1 {
+  font-size: 36px;
+}
+
+.home form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.home-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.home-menu .button-link {
+  width: 230px;
+}
+
+.page { /*règles, introuvable, scores, stats*/
+  text-align: center;
+}
+
+.page .button-link {
+  margin-top: 25px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid #d3d6da;
+}
+
+.table th {
+  background-color: #f2f2f2;
+}
+
+.table-scroll { /*le tableau des scores défile sur le côté s'il est trop large*/
+  overflow-x: auto;
+}
+
+.rules {
+  text-align: left;
+}
+
+.rules h1,
+.rules h2 {
+  text-align: center;
+}
+
+.rules ul {
+  padding-left: 20px;
+  line-height: 1.5;
+}
+
+.rules .row {
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.rules .row + p {
+  text-align: center;
+}
+
+.rules .button-link {
+  display: block;
+  width: fit-content;
+  margin: 25px auto 0 auto;
+}
+
+.stats { /*les chiffres en gros des stats*/
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  font-size: 13px;
+}
+
+.stat-number {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.distribution { /*les barres de la répartition des victoires*/
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.distribution-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.distribution-label {
+  width: 15px;
+  font-weight: bold;
+}
+
+.distribution-bar {
+  background-color: #787c7e;
+  color: white;
+  font-weight: bold;
+  text-align: right;
+  padding: 3px 8px;
+}
+
+.game {
+  text-align: center;
+}
+
+.game .player {
+  color: #787c7e;
+  margin: 0;
+}
+
+.game .message { /*toujours la même place pour que la grille bouge pas*/
+  min-height: 20px;
+  margin: 10px 0 0 0;
+  font-weight: bold;
+}
+
+.game .message.checking {
+  color: #787c7e;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin: 20px 0;
+}
+
+.row {
+  display: flex;
+  gap: 5px;
+}
+
+.tile {
+  width: 55px;
+  height: 55px;
+  border: 2px solid #d3d6da;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  font-size: 28px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tile.filled { /*une lettre tapée mais pas encore validée*/
+  border-color: #878a8c;
+}
+
+.tile.correct {
+  background-color: #6aaa64;
+  border-color: #6aaa64;
+  color: white;
+}
+
+.tile.present {
+  background-color: #c9b458;
+  border-color: #c9b458;
+  color: white;
+}
+
+.tile.absent {
+  background-color: #787c7e;
+  border-color: #787c7e;
+  color: white;
+}
+
+.row.invalid { /*la ligne refusée tremble et passe en rouge*/
+  animation: shake 0.4s ease-in-out;
+}
+
+.row.invalid .tile {
+  border-color: #d93025;
+  background-color: #fce8e6;
+  color: #d93025;
+}
+
+.row.checking .tile { /*elle clignote pendant la vérification*/
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+.tile.flip { /*backwards = elle reste blanche avant son tour*/
+  animation: flip 0.5s ease-in-out backwards;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+    background-color: white;
+    border-color: #878a8c;
+    color: #1a1a1b;
+  }
+  50% {
+    transform: rotateX(90deg);
+    background-color: white;
+    border-color: #878a8c;
+    color: #1a1a1b;
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes shake {
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 15px;
+  user-select: none;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.key { /*les touches se partagent la place*/
+  flex: 1;
+  max-width: 43px;
+  height: 52px;
+  padding: 0;
+  border-radius: 4px;
+  background-color: #d3d6da;
+  color: #1a1a1b;
+  font-size: 15px;
+}
+
+.key:hover {
+  background-color: #bfc3c8;
+}
+
+.key.wide { /*Entrée et Effacer*/
+  flex: 1.5;
+  max-width: 65px;
+  font-size: 12px;
+}
+
+.key.correct,
+.key.correct:hover {
+  background-color: #6aaa64;
+  color: white;
+}
+
+.key.present,
+.key.present:hover {
+  background-color: #c9b458;
+  color: white;
+}
+
+.key.absent,
+.key.absent:hover {
+  background-color: #787c7e;
+  color: white;
+}
+
+.end-game-overlay { /*le fond gris derrière l'écran de fin*/
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 10;
+  animation: appear 0.3s ease-in 1.6s backwards; /*on attend que la dernière ligne ait fini de se retourner*/
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+}
+
+.end-game {
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.end-game h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.end-game .points {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.end-game .word {
+  margin: 0;
+  font-size: 18px;
+}
+
+.end-game .word strong {
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.end-game .share-ok,
+.end-game .error { /*le message après partager (mot du jour)*/
+  margin: 0;
+  font-size: 14px;
+}
+
+.end-game .share-ok {
+  color: #6aaa64;
+  font-weight: bold;
+}
+
+.end-game a { /*en gris, c'est moins important que rejouer*/
+  color: #787c7e;
+}
+
+.countdown { /*le compte à rebours (mot du jour)*/
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+  color: #787c7e;
+}
+
+.countdown-time {
+  font-size: 26px;
+  font-weight: bold;
+  color: #1a1a1b;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 400px) { /*téléphone*/
+  .home form {
+    flex-direction: column;
+  }
+
+  .keyboard-row {
+    gap: 4px;
+  }
+
+  .key {
+    height: 46px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) { /*petits téléphones : des cases plus petites sinon ça dépasse*/
+  .tile {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+}
