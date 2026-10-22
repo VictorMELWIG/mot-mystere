@@ -23,6 +23,8 @@ export const initialGameState = {
   errorMessage: '',   // Message affiché si le mot est refusé
   isChecking: false,  // true pendant que le Wiktionnaire vérifie le mot
   rejectCount: 0,     // Nombre de mots refusés (sert à relancer l'animation de la ligne refusée)
+  startedAt: 0,       // Heure de début de la partie (pour le temps de résolution)
+  endedAt: 0,         // Heure de fin de la partie (0 tant qu'elle est en cours)
 };
 
 // La fonction reducer qui met à jour l'état selon l'action
@@ -85,12 +87,19 @@ export function gameReducer(state, action) {
         newGameStatus = 'LOST';
       }
 
-      // 5. RETOURNER le nouvel état (TRÈS IMPORTANT !)
+      // 5. Si la partie vient de se terminer, on note l'heure de fin
+      let endedAt = 0;
+      if (newGameStatus !== 'IN_PROGRESS') {
+        endedAt = Date.now();
+      }
+
+      // 6. RETOURNER le nouvel état (TRÈS IMPORTANT !)
       return {
         ...state,
         guesses: newGuesses,
         currentGuess: '',
         gameStatus: newGameStatus,
+        endedAt: endedAt,
         errorMessage: action.payload || '', // Message éventuel (ex : dictionnaire injoignable)
         isChecking: false,
       };
@@ -106,6 +115,8 @@ export function gameReducer(state, action) {
         currentGuess: '',           // On vide la ligne en cours
         errorMessage: '',
         isChecking: false,
+        startedAt: Date.now(),      // La partie commence maintenant
+        endedAt: 0,
       };
 
     default:

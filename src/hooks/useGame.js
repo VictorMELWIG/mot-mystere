@@ -18,6 +18,21 @@ export function useGame(wordList = WORD_LISTS[WORD_LENGTH]) {
   // Points de la partie (0 tant qu'elle n'est pas gagnée)
   const score = calculateScore(state.guesses.length, state.gameStatus === 'WON');
 
+  // Résumé de la partie terminée, prêt à être enregistré (null tant que la partie est en cours)
+  let gameResult = null;
+  if (state.gameStatus !== 'IN_PROGRESS') {
+    gameResult = {
+      word: state.solution,                              // Le mot mystère avec ses accents
+      attempts: state.guesses.length,                    // Nombre d'essais
+      points: score,                                     // Points gagnés
+      won: state.gameStatus === 'WON',                   // Gagné ou perdu
+      date: state.endedAt,                               // Date de fin de la partie (en millisecondes)
+      duration: state.endedAt - state.startedAt,         // Temps de résolution, en millisecondes
+      wordLength: state.targetWord.length,               // Longueur du mot (palier 5)
+      hardMode: false,                                   // Mode difficile (palier 5)
+    };
+  }
+
   // Fonction pour initialiser ou relancer une partie avec un mot aléatoire
   const startNewGame = () => {
     const randomWord = getRandomWord(wordList);
@@ -72,6 +87,7 @@ export function useGame(wordList = WORD_LISTS[WORD_LENGTH]) {
     state,
     keyboardStatuses,
     score,
+    gameResult,
     solutionUrl: getWiktionaryUrl(state.solution), // Lien vers la page du mot mystère
     addLetter,
     deleteLetter,
