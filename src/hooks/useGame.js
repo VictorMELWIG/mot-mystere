@@ -3,16 +3,14 @@ import { gameReducer, initialGameState, ACTIONS } from '../logic/gameReducer.js'
 import { getRandomWord } from '../logic/randomWord.js';
 import { getKeyboardStatuses } from '../logic/keyboardState.js';
 import { calculateScore } from '../logic/scoring.js';
-import { usePhysicalKeyboard } from './usePhysicalKeyboard.js';
+import { isValidWord } from '../logic/validateGuessWord.js';
+import { isFrenchWord, getWiktionaryUrl } from '../services/wiktionary.js';
 import { WORD_LISTS } from '../data/words.js';
 import { WORD_LENGTH } from '../constants.js';
 
 // Par défaut, on joue avec la liste des mots de 5 lettres
 export function useGame(wordList = WORD_LISTS[WORD_LENGTH]) {
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
-
-  // Le clavier de l'ordinateur envoie ses actions directement au reducer
-  usePhysicalKeyboard(dispatch);
 
   // Couleur de chaque lettre du clavier, recalculée seulement quand les essais changent
   const keyboardStatuses = useMemo(() => getKeyboardStatuses(state.guesses), [state.guesses]);
@@ -32,7 +30,7 @@ export function useGame(wordList = WORD_LISTS[WORD_LENGTH]) {
     dispatch({ type: ACTIONS.SET_WORD, payload: getRandomWord(wordList) });
   }, [wordList]);
 
-  // Fonctions d'aide pour le joueur (pour le futur clavier à l'écran)
+  // Fonctions d'aide pour le joueur (utilisées par le clavier)
   const addLetter = (letter) => {
     dispatch({ type: ACTIONS.ADD_LETTER, payload: letter });
   };
@@ -41,14 +39,40 @@ export function useGame(wordList = WORD_LISTS[WORD_LENGTH]) {
     dispatch({ type: ACTIONS.DELETE_LETTER });
   };
 
-  const submitGuess = () => {
-    dispatch({ type: ACTIONS.SUBMIT_GUESS });
+  // Validation d'un mot : on le vérifie auprès du Wiktionnaire avant de le colorer
+  const submitGuess = async () => {
+    // Pas de double validation pendant la vérification, ni après la fin de la partie
+    if (state.isChecking || state.gameStatus !== 'IN_PROGRESS') return;
+
+    // 1. Mot trop court : pas la peine de déranger le Wiktionnaire
+    const validation = isValidWord(state.currentGuess, null, state.targetWord.length);
+    if (!validation.valid) {
+      dispatch({ type: ACTIONS.REJECT_GUESS, payload: validation.reason });
+      return;
+    }
+
+    // 2. On prévient que la vérification commence (le joueur voit que ça travaille)
+    dispatch({ type: ACTIONS.START_CHECK });
+
+    try {
+      // 3. On demande au Wiktionnaire si c'est un vrai mot français
+      const isFrench = await isFrenchWord(state.currentGuess);
+      if (isFrench) {
+        dispatch({ type: ACTIONS.SUBMIT_GUESS });
+      } else {
+        dispatch({ type: ACTIONS.REJECT_GUESS, payload: "Ce mot n'est pas dans le dictionnaire." });
+      }
+    } catch {
+      // 4. Le Wiktionnaire ne répond pas : on accepte le mot pour ne pas bloquer la partie
+      dispatch({ type: ACTIONS.SUBMIT_GUESS, payload: 'Dictionnaire injoignable : mot accepté sans vérification.' });
+    }
   };
 
   return {
     state,
     keyboardStatuses,
     score,
+    solutionUrl: getWiktionaryUrl(state.solution), // Lien vers la page du mot mystère
     addLetter,
     deleteLetter,
     submitGuess,

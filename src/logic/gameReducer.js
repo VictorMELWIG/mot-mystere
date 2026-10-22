@@ -1,32 +1,36 @@
 import { evaluateGuess } from './evaluateGuess.js';
 import { isValidWord } from './validateGuessWord.js';
 import { normalizeWord } from './normalize.js';
-import { WORD_LISTS } from '../data/words.js';
 import { MAX_ATTEMPTS } from '../constants.js';
 
 // Les actions possibles dans le jeu
 export const ACTIONS = {
   ADD_LETTER: 'ADD_LETTER',
   DELETE_LETTER: 'DELETE_LETTER',
-  SUBMIT_GUESS: 'SUBMIT_GUESS',
+  START_CHECK: 'START_CHECK',     // Début de la vérification auprès du Wiktionnaire
+  REJECT_GUESS: 'REJECT_GUESS',   // Le mot est refusé (trop court, ou pas dans le dictionnaire)
+  SUBMIT_GUESS: 'SUBMIT_GUESS',   // Le mot est accepté : on le colore
   SET_WORD: 'SET_WORD',
 };
 
 // L'état initial de la partie
 export const initialGameState = {
-  targetWord: '',     // Le mot mystère choisi au hasard
+  targetWord: '',     // Le mot mystère, en majuscules sans accents (ex: 'ECOLE')
+  solution: '',       // Le mot mystère tel qu'il est écrit dans la liste, avec ses accents (ex: 'école')
   guesses: [],        // Les mots déjà validés (ex: [{ word: 'ARBRE', colors: ['correct', 'absent', ...] }])
   currentGuess: '',   // La ligne en cours (ex: 'CHAT')
   gameStatus: 'IN_PROGRESS', // 'IN_PROGRESS', 'WON', 'LOST'
   errorMessage: '',   // Message affiché si le mot est refusé
+  isChecking: false,  // true pendant que le Wiktionnaire vérifie le mot
+  rejectCount: 0,     // Nombre de mots refusés (sert à relancer l'animation de la ligne refusée)
 };
 
 // La fonction reducer qui met à jour l'état selon l'action
 export function gameReducer(state, action) {
   switch (action.type) {
     case ACTIONS.ADD_LETTER:
-      // On ne peut plus taper de lettres si la partie est terminée
-      if (state.gameStatus !== 'IN_PROGRESS') return state;
+      // On ne peut pas taper si la partie est terminée ou pendant la vérification
+      if (state.gameStatus !== 'IN_PROGRESS' || state.isChecking) return state;
       // Si la ligne a déjà autant de lettres que le mot mystère, on ne peut plus en ajouter
       if (state.currentGuess.length >= state.targetWord.length) return state;
       return {
@@ -36,22 +40,35 @@ export function gameReducer(state, action) {
       };
 
     case ACTIONS.DELETE_LETTER:
+      // On ne peut pas effacer pendant la vérification
+      if (state.isChecking) return state;
       return {
         ...state,
         currentGuess: state.currentGuess.slice(0, -1), // Supprime la dernière lettre
         errorMessage: '',
       };
 
-    // Validation de la proposition (quand le joueur appuie sur Entrée)
+    case ACTIONS.START_CHECK:
+      return { ...state, isChecking: true, errorMessage: '' };
+
+    case ACTIONS.REJECT_GUESS:
+      // Un mot refusé ne compte pas comme un essai : on garde la ligne telle quelle
+      return {
+        ...state,
+        isChecking: false,
+        errorMessage: action.payload,
+        rejectCount: state.rejectCount + 1,
+      };
+
+    // Le mot a été accepté : on le colore
     case ACTIONS.SUBMIT_GUESS: {
       // On ne peut plus jouer si la partie est terminée
       if (state.gameStatus !== 'IN_PROGRESS') return state;
 
-      // 1. Vérifier que le mot est valide (bon nombre de lettres + présent dans la liste)
-      const wordLength = state.targetWord.length;
-      const validation = isValidWord(state.currentGuess, WORD_LISTS[wordLength], wordLength);
+      // 1. Sécurité : vérifier que le mot a le bon nombre de lettres
+      const validation = isValidWord(state.currentGuess, null, state.targetWord.length);
       if (!validation.valid) {
-        return { ...state, errorMessage: validation.reason };
+        return { ...state, isChecking: false, errorMessage: validation.reason, rejectCount: state.rejectCount + 1 };
       }
 
       // 2. Évaluer la proposition avec ta fonction evaluateGuess
@@ -74,7 +91,8 @@ export function gameReducer(state, action) {
         guesses: newGuesses,
         currentGuess: '',
         gameStatus: newGameStatus,
-        errorMessage: '',
+        errorMessage: action.payload || '', // Message éventuel (ex : dictionnaire injoignable)
+        isChecking: false,
       };
     }
 
@@ -82,10 +100,12 @@ export function gameReducer(state, action) {
       return {
         ...state,
         targetWord: normalizeWord(action.payload), // On met à jour le mot mystère (en majuscules, sans accents)
+        solution: action.payload,   // On garde aussi le mot avec ses accents pour la fin de partie
         guesses: [],                // On remet les essais à vide pour une nouvelle partie
         gameStatus: 'IN_PROGRESS',  // On remet le statut en cours
         currentGuess: '',           // On vide la ligne en cours
         errorMessage: '',
+        isChecking: false,
       };
 
     default:

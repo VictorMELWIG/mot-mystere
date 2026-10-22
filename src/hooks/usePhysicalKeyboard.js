@@ -1,26 +1,25 @@
-import { useEffect } from 'react';
-import { ACTIONS } from '../logic/gameReducer.js';
-
-// Écoute les touches du clavier de l'ordinateur et les transforme en actions du jeu
-export function usePhysicalKeyboard(dispatch) {
+//ce hook écoute le clavier de l'ordi pendant la partie
+//onLetter quand on tape une lettre, onDelete pour Retour arrière, onEnter pour Entrée
+import { useEffect } from "react";
+export function usePhysicalKeyboard(onLetter, onDelete, onEnter) {
   useEffect(() => {
-    function handleKeyDown(event) {
-      // On ignore les raccourcis du navigateur (Ctrl+R, Cmd+C...)
-      if (event.ctrlKey || event.metaKey || event.altKey) return;
-
-      if (event.key === 'Enter') {
-        dispatch({ type: ACTIONS.SUBMIT_GUESS });
-      } else if (event.key === 'Backspace') {
-        dispatch({ type: ACTIONS.DELETE_LETTER });
-      } else if (/^[a-zA-Z]$/.test(event.key)) {
-        // Une seule lettre de A à Z : les autres touches (chiffres, Shift...) sont ignorées
-        dispatch({ type: ACTIONS.ADD_LETTER, payload: event.key });
+    function handleKeyDown(e) {
+      //on ignore les raccourcis du navigateur (Ctrl+R, Ctrl+C...)
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault(); //empeche le navigateur de recharger la page quand on tape Entrée
+        onEnter();
+      } else if (e.key === "Backspace") {
+        onDelete();
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        //que les lettres de A à Z, le reste on s'en fiche
+        onLetter(e.key.toUpperCase());
       }
     }
-
-    // On commence à écouter le clavier quand la page de jeu s'affiche...
-    window.addEventListener('keydown', handleKeyDown);
-    // ...et on arrête quand on quitte la page
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dispatch]);
+    window.addEventListener("keydown", handleKeyDown);
+    //on enlève l'écouteur quand on quitte la page
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onLetter, onDelete, onEnter]);
 }
