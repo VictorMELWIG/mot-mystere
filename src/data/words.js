@@ -1,7 +1,10 @@
 import motsSolutions5 from './mots-solutions.json';
+import motsSolutions6 from './mots-solutions-6.json';
+import motsSolutions7 from './mots-solutions-7.json';
 
-// Les listes de mots solutions, rangées par longueur de mot
-// Les listes de 6 et 7 lettres seront ajoutées ici quand elles seront remplies (palier 5)
+// Les listes de mots mystères, rangées par longueur
 export const WORD_LISTS = {
   5: motsSolutions5,
+  6: motsSolutions6,
+  7: motsSolutions7,
 };

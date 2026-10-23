@@ -1,22 +1,38 @@
 import { MAX_ATTEMPTS } from '../constants.js';
 
-// Calcule les statistiques d'un joueur à partir de toutes les parties enregistrées
-export function getStats(games, pseudo) {
-  let played = 0;        // Parties jouées
-  let wins = 0;          // Parties gagnées
-  let totalPoints = 0;   // Total des points
-  let currentStreak = 0; // Série en cours (victoires d'affilée)
-  let bestStreak = 0;    // Meilleure série
+// Les 10 meilleures parties gagnées, par points puis par date (la plus ancienne devant)
+export function getTopScores(games) {
+  const wonGames = [];
+  for (const game of games) {
+    if (game.won) {
+      wonGames.push(game);
+    }
+  }
 
-  // Répartition des victoires selon le nombre d'essais : { 1: 0, 2: 0, ..., 6: 0 }
+  wonGames.sort((a, b) => {
+    if (a.points !== b.points) {
+      return b.points - a.points;
+    }
+    return a.date - b.date;
+  });
+
+  return wonGames.slice(0, 10);
+}
+
+// Statistiques d'un joueur : parties, % de victoires, séries, points et répartition des essais
+export function getStats(games, pseudo) {
+  let played = 0;
+  let wins = 0;
+  let totalPoints = 0;
+  let currentStreak = 0;
+  let bestStreak = 0;
+
   const distribution = {};
   for (let attempts = 1; attempts <= MAX_ATTEMPTS; attempts++) {
     distribution[attempts] = 0;
   }
 
-  // On parcourt les parties dans l'ordre où elles ont été jouées
   for (const game of games) {
-    // On ignore les parties des autres joueurs
     if (game.pseudo !== pseudo) {
       continue;
     }
@@ -27,18 +43,15 @@ export function getStats(games, pseudo) {
     if (game.won) {
       wins = wins + 1;
       distribution[game.attempts] = distribution[game.attempts] + 1;
-      // Une victoire de plus dans la série
       currentStreak = currentStreak + 1;
       if (currentStreak > bestStreak) {
         bestStreak = currentStreak;
       }
     } else {
-      // Une défaite remet la série à zéro
       currentStreak = 0;
     }
   }
 
-  // Pourcentage de victoires (0 si aucune partie, pour ne pas diviser par zéro)
   let winPercent = 0;
   if (played > 0) {
     winPercent = Math.round((wins / played) * 100);
