@@ -1,9 +1,9 @@
-//les pages sans partie : accueil, règles, page introuvable (+ scores et stats, pas encore branchées)
+//les pages sans partie : accueil, règles, page introuvable, scores et stats
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { Tile } from "../components/Board.jsx";
-// import { getTopScores } from "../logic/leaderboard.js"; //désactivé tant que personne enregistre les parties (+ getDailyScores pour le mot du jour)
-// import { getStats } from "../logic/stats.js"; //désactivé tant que personne enregistre les parties
+import { getTopScores, getStats } from "../logic/scores.js"; //(+ getDailyScores pour le mot du jour, pas encore écrit)
+import { loadGames } from "../services/gamesStorage.js";
 
 function HomeLink() {
   return <Link to="/" className="button-link">Retour à l&apos;accueil</Link>;
@@ -35,8 +35,8 @@ export function HomePage() {
       {error && <p className="error">{error}</p>}
       <nav className="home-menu">
         {/* <Link to="/jour" className="button-link">Mot du jour</Link> désactivé tant que la logique du mot du jour existe pas */}
-        {/* <Link to="/scores" className="button-link">Tableau des scores</Link> désactivé tant que personne enregistre les parties */}
-        {/* <Link to="/stats" className="button-link">Statistiques</Link> désactivé tant que personne enregistre les parties */}
+        <Link to="/scores" className="button-link">Tableau des scores</Link>
+        <Link to="/stats" className="button-link">Statistiques</Link>
         <Link to="/regles" className="button-link">Règles du jeu</Link>
       </nav>
     </div>
@@ -109,85 +109,84 @@ export function NotFoundPage() {
   );
 }
 
-// const games = []; //la liste des parties enregistrées, à brancher quand quelqu'un les enregistre
-//
-// function formatDuration(seconds) { //pour le mot du jour : "2 min 05 s"
-//   return Math.floor(seconds / 60) + " min " + String(seconds % 60).padStart(2, "0") + " s";
-// }
-//
-// function ScoreTable({ scores, daily = false }) { //daily=mot du jour : le temps en plus et le mot caché
-//   if (scores.length === 0) return <p>Aucune partie pour l&apos;instant, va jouer !</p>;
-//   return (
-//     <div className="table-scroll">
-//       <table className="table">
-//         <thead>
-//           <tr>
-//             <th>#</th><th>Pseudo</th>{!daily && <th>Mot</th>}<th>Essais</th><th>Points</th>{daily && <th>Temps</th>}<th>Date</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {scores.map((score, i) => (
-//             <tr key={i}>
-//               <td>{i + 1}</td>
-//               <td>{score.pseudo}</td>
-//               {!daily && <td>{score.word}</td>}
-//               <td>{score.attempts}</td>
-//               <td>{score.points}</td>
-//               {daily && <td>{formatDuration(score.duration)}</td>}
-//               <td>{new Date(score.date).toLocaleDateString("fr-FR")}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-//
-// export function ScoresPage() { //désactivé tant que personne enregistre les parties
-//   return (
-//     <div className="page">
-//       <h1>Tableau des scores</h1>
-//       {/* <h2>Mot du jour</h2> <ScoreTable scores={getDailyScores(games)} daily /> désactivé tant que la logique du mot du jour existe pas */}
-//       <h2>Classement général</h2>
-//       <ScoreTable scores={getTopScores(games)} />
-//       <HomeLink />
-//     </div>
-//   );
-// }
-//
-// export function StatsPage() { //désactivé tant que personne enregistre les parties
-//   const pseudo = localStorage.getItem("pseudo") || "Joueur";
-//   const stats = getStats(games, pseudo);
-//   const counts = Object.entries(stats.distribution); //[["1", 0], ["2", 3]...] nombre d'essais -> victoires
-//   const biggest = Math.max(1, ...Object.values(stats.distribution)); //la barre la plus longue prend toute la largeur
-//   const numbers = [
-//     [stats.played, "Parties jouées"],
-//     [stats.winPercent + "%", "Victoires"],
-//     [stats.currentStreak, "Série en cours"],
-//     [stats.bestStreak, "Meilleure série"],
-//     [stats.totalPoints, "Points au total"],
-//   ];
-//   return (
-//     <div className="page">
-//       <h1>Statistiques de {pseudo}</h1>
-//       <div className="stats">
-//         {numbers.map(([number, label]) => (
-//           <div className="stat" key={label}>
-//             <span className="stat-number">{number}</span>
-//             <span>{label}</span>
-//           </div>
-//         ))}
-//       </div>
-//       <h2>Victoires selon le nombre d&apos;essais</h2>
-//       <div className="distribution">
-//         {counts.map(([attempts, count]) => (
-//           <div className="distribution-row" key={attempts}>
-//             <span className="distribution-label">{attempts}</span>
-//             <div className="distribution-bar" style={{ width: Math.max((count / biggest) * 100, 8) + "%" }}>{count}</div>
-//           </div>
-//         ))}
-//       </div>
-//       <HomeLink />
-//     </div>
-//   );
-// }
+function formatDuration(seconds) { //pour le mot du jour : "2 min 05 s"
+  return Math.floor(seconds / 60) + " min " + String(seconds % 60).padStart(2, "0") + " s";
+}
+
+function ScoreTable({ scores, daily = false }) { //daily=mot du jour : le temps en plus et le mot caché
+  if (scores.length === 0) return <p>Aucune partie pour l&apos;instant, va jouer !</p>;
+  return (
+    <div className="table-scroll">
+      <table className="table">
+        <thead>
+          <tr>
+            <th>#</th><th>Pseudo</th>{!daily && <th>Mot</th>}<th>Essais</th><th>Points</th>{daily && <th>Temps</th>}<th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {scores.map((score, i) => (
+            <tr key={i}>
+              <td>{i + 1}</td>
+              <td>{score.pseudo}</td>
+              {!daily && <td>{score.word}</td>}
+              <td>{score.attempts}</td>
+              <td>{score.points}</td>
+              {daily && <td>{formatDuration(score.duration)}</td>}
+              <td>{new Date(score.date).toLocaleDateString("fr-FR")}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export function ScoresPage() {
+  const games = loadGames(); //toutes les parties enregistrées sur cet ordinateur
+  return (
+    <div className="page">
+      <h1>Tableau des scores</h1>
+      {/* <h2>Mot du jour</h2> <ScoreTable scores={getDailyScores(games)} daily /> désactivé tant que la logique du mot du jour existe pas */}
+      <h2>Classement général</h2>
+      <ScoreTable scores={getTopScores(games)} />
+      <HomeLink />
+    </div>
+  );
+}
+
+export function StatsPage() {
+  const pseudo = localStorage.getItem("pseudo") || "Joueur";
+  const stats = getStats(loadGames(), pseudo);
+  const counts = Object.entries(stats.distribution); //[["1", 0], ["2", 3]...] nombre d'essais -> victoires
+  const biggest = Math.max(1, ...Object.values(stats.distribution)); //la barre la plus longue prend toute la largeur
+  const numbers = [
+    [stats.played, "Parties jouées"],
+    [stats.winPercent + "%", "Victoires"],
+    [stats.currentStreak, "Série en cours"],
+    [stats.bestStreak, "Meilleure série"],
+    [stats.totalPoints, "Points au total"],
+  ];
+  return (
+    <div className="page">
+      <h1>Statistiques de {pseudo}</h1>
+      <div className="stats">
+        {numbers.map(([number, label]) => (
+          <div className="stat" key={label}>
+            <span className="stat-number">{number}</span>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+      <h2>Victoires selon le nombre d&apos;essais</h2>
+      <div className="distribution">
+        {counts.map(([attempts, count]) => (
+          <div className="distribution-row" key={attempts}>
+            <span className="distribution-label">{attempts}</span>
+            <div className="distribution-bar" style={{ width: Math.max((count / biggest) * 100, 8) + "%" }}>{count}</div>
+          </div>
+        ))}
+      </div>
+      <HomeLink />
+    </div>
+  );
+}

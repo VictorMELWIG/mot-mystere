@@ -2,9 +2,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Link } from "react-router";
-import { HomePage, RulesPage, NotFoundPage } from "./pages/Pages.jsx";
+import { HomePage, RulesPage, NotFoundPage, ScoresPage, StatsPage } from "./pages/Pages.jsx";
 import GamePage from "./pages/GamePage.jsx";
-// import { ScoresPage, StatsPage } from "./pages/Pages.jsx"; //désactivé tant que personne enregistre les parties
 // import { DailyPage } from "./pages/GamePage.jsx"; //désactivé tant que useGame sait pas faire le mot du jour
 import "./styles/index.css";
 
@@ -19,8 +18,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<HomePage />} />
           <Route path="/partie" element={<GamePage />} />
           <Route path="/regles" element={<RulesPage />} />
-          {/* <Route path="/scores" element={<ScoresPage />} /> désactivé, voir en haut */}
-          {/* <Route path="/stats" element={<StatsPage />} /> désactivé, voir en haut */}
+          <Route path="/scores" element={<ScoresPage />} />
+          <Route path="/stats" element={<StatsPage />} />
           {/* <Route path="/jour" element={<DailyPage />} /> désactivé, voir en haut */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

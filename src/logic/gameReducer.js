@@ -21,6 +21,7 @@ export const initialGameState = {
   rejectCount: 0,
   startedAt: 0,
   endedAt: 0,
+  day: '', // le jour du mot du jour ("2026-10-24"), vide en partie libre
 };
 
 // Renvoie le nouvel état de la partie selon l'action reçue

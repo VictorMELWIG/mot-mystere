@@ -1,4 +1,5 @@
 import { MAX_ATTEMPTS } from '../constants.js';
+import { getTodayKey } from './dailyWord.js';
 
 // Les 10 meilleures parties gagnées, par points puis par date (la plus ancienne devant)
 export function getTopScores(games) {
@@ -17,6 +18,25 @@ export function getTopScores(games) {
   });
 
   return wonGames.slice(0, 10);
+}
+
+// Le classement du mot du jour : les parties gagnées aujourd'hui, par points puis par temps (le plus rapide devant)
+export function getDailyScores(games, todayKey = getTodayKey()) {
+  const todayGames = [];
+  for (const game of games) {
+    if (game.daily && game.day === todayKey && game.won) {
+      todayGames.push(game);
+    }
+  }
+
+  todayGames.sort((a, b) => {
+    if (a.points !== b.points) {
+      return b.points - a.points;
+    }
+    return a.duration - b.duration;
+  });
+
+  return todayGames.slice(0, 10);
 }
 
 // Statistiques d'un joueur : parties, % de victoires, séries, points et répartition des essais
