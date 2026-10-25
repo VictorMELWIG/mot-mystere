@@ -1,13 +1,11 @@
 # Le Mot Mystère
 
-**Site en ligne : ADRESSE-VERCEL-À-METTRE-ICI**
-
 Un jeu de mots en React : faut trouver un mot de 5, 6 ou 7 lettres, avec les couleurs vert / jaune / gris après chaque essai. Les mots proposés sont vérifiés avec l'API du Wiktionnaire.
 
 ## Le binôme
 
 - **Victor Melwig-Maes** : l'affichage (pages, composants, CSS, navigation). Tout est expliqué dans [AFFICHAGE.md](AFFICHAGE.md).
-- **NOM-DU-BINÔME-À-METTRE-ICI (loulou733)** : la logique du jeu (`src/logic/`, `src/hooks/`, `src/services/`, `src/data/`, les tests). C'est expliqué plus bas, dans « Partie logique ».
+- **loulou733** : la logique du jeu (`src/logic/`, `src/hooks/`, `src/services/`, `src/data/`, les tests). C'est expliqué plus bas, dans « Partie logique ».
 
 ## Palier visé
 
@@ -20,7 +18,7 @@ Le palier 5 (les variantes).
 | 1 - le jeu | fait |
 | 2 - le dictionnaire | fait |
 | 3 - le confort de jeu | fait |
-| 4 - le mot du jour | fait, en ligne sur Vercel |
+| 4 - le mot du jour | marche en local, mais le site est pas en ligne sur Vercel |
 | 5 - les variantes | fait |
 | 6 - les quatre grilles | pas fait |
 
@@ -53,7 +51,7 @@ Si on refusait, la partie serait bloquée tant que l'API est en panne, vu que pl
 
 ## Les listes de 6 et 7 lettres
 
-LISTES-À-METTRE-ICI : comment les listes `mots-solutions-6.json` (405 mots) et `mots-solutions-7.json` (349 mots) ont été faites.
+C'est mon binôme qui a fait les listes `mots-solutions-6.json` (405 mots) et `mots-solutions-7.json` (349 mots).
 
 ## L'affichage
 

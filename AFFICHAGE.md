@@ -119,13 +119,13 @@ Les données descendent par les props : la partie (`FreeGame` ou `DailyPage`) do
 ## Les galères, et comment je les ai réglées
 
 - **La ligne refusée tremblait qu'une fois.** Au 2e mot refusé d'affilée, la classe CSS était déjà là, donc l'animation repartait pas. J'ai mis le nombre de refus (`rejectCount`) dans la `key` de la ligne en cours : à chaque refus la key change, React recrée la ligne et l'animation repart.
-- **Retourner les cases une par une.** Chaque case a un `animationDelay` de `place × 0,25 s`. Mais pendant ce délai la case montrait déjà sa couleur, du coup `backwards` la garde blanche tant que c'est pas son tour.
+- **Retourner les cases une par une.** Chaque case a un `animationDelay` de `place x 0,25 s`. Mais pendant ce délai la case montrait déjà sa couleur, du coup `backwards` la garde blanche tant que c'est pas son tour.
 - **L'écran de fin arrivait trop tôt.** Il cachait la dernière ligne avant qu'elle ait fini de se retourner. Maintenant il attend que la dernière case ait fini : 1,6 s en 5 lettres (elle commence à 1 s et met 0,5 s à se retourner), un peu plus en 6 ou 7 lettres.
 - **Le dico en panne mettait une ligne vide en rouge.** Son message arrive au même endroit qu'un refus, alors que le mot est accepté. Maintenant la ligne est montrée refusée que s'il reste des lettres dedans.
 - **Entrée recliquait le dernier bouton.** Après un clic sur une touche à l'écran, appuyer sur Entrée recliquait aussi ce bouton. `preventDefault()` sur Entrée règle ça.
 - **Changer de longueur relançait pas la partie.** La partie est préparée qu'au premier affichage. Réglé avec la `key` sur le contenu de la page de jeu (voir plus haut).
 - **7 lettres ça dépassait de l'écran sur téléphone.** 7 cases de 55 px plus les écarts, c'est plus large qu'un petit téléphone. Du coup les cases rétrécissent quand l'écran est étroit.
-- **Brancher mon affichage sur la logique.** Les noms que renvoie `useGame` c'était pas ceux que j'avais prévus. J'ai adapté l'affichage aux vrais noms (`state`, `keyboardStatuses`, `score`, `solutionUrl`, `wordLength`, `maxAttempts`…) au lieu de toucher à la logique de mon binôme.
+- **Brancher mon affichage sur la logique.** Les noms que renvoie `useGame` c'était pas ceux que j'avais prévus. J'ai adapté l'affichage aux vrais noms (`state`, `keyboardStatuses`, `score`, `solutionUrl`, `wordLength`, `maxAttempts`...) au lieu de toucher à la logique de mon binôme.
 - **Les adresses en ligne.** Sur Vercel, ouvrir direct `/jour` ou rafraîchir une page ça donnerait une erreur 404, parce que le serveur connaît que `index.html`. `vercel.json` lui dit de toujours renvoyer `index.html`, et après c'est React Router qui affiche la bonne page.
 
 ## La sécurité côté affichage
