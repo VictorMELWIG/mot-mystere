@@ -114,11 +114,39 @@ input:focus {
   font-size: 36px;
 }
 
-.home form {
+.home form { /*le pseudo, les réglages en dessous puis le bouton*/
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   margin-top: 25px;
+}
+
+.home form input[type="text"] {
+  width: 230px;
+}
+
+.settings,
+.filters { /*longueur et mode difficile sur l'accueil, filtres des scores*/
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.settings label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+select {
+  font-family: inherit;
+  font-size: 16px;
+  padding: 6px;
+  border: 2px solid #d3d6da;
+  border-radius: 6px;
 }
 
 .home-menu {
@@ -263,20 +291,21 @@ input:focus {
   margin: 20px 0;
 }
 
-.row {
+.row { /*55px max, plus petit si l'écran est étroit : la largeur moins les 32px de marge et les 5px entre les cases, divisée par le nombre de cases*/
+  --tile: min(55px, calc((100vw - 32px - (var(--letters, 5) - 1) * 5px) / var(--letters, 5)));
   display: flex;
   gap: 5px;
 }
 
 .tile {
-  width: 55px;
-  height: 55px;
+  width: var(--tile);
+  height: var(--tile);
   border: 2px solid #d3d6da;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: Arial, sans-serif;
-  font-size: 28px;
+  font-size: calc(var(--tile) / 2);
   font-weight: bold;
   text-transform: uppercase;
 }
@@ -425,6 +454,10 @@ input:focus {
   animation: appear 0.3s ease-in 1.6s backwards; /*on attend que la dernière ligne ait fini de se retourner*/
 }
 
+.end-game-overlay.now { /*mot du jour déjà fini en arrivant : pas besoin d'attendre*/
+  animation: none;
+}
+
 @keyframes appear {
   0% {
     opacity: 0;
@@ -496,10 +529,6 @@ input:focus {
 }
 
 @media (max-width: 400px) { /*téléphone*/
-  .home form {
-    flex-direction: column;
-  }
-
   .keyboard-row {
     gap: 4px;
   }
@@ -510,10 +539,3 @@ input:focus {
   }
 }
 
-@media (max-width: 360px) { /*petits téléphones : des cases plus petites sinon ça dépasse*/
-  .tile {
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-  }
-}

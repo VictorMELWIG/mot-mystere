@@ -3,14 +3,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Link } from "react-router";
 import { HomePage, RulesPage, NotFoundPage, ScoresPage, StatsPage } from "./pages/Pages.jsx";
-import GamePage from "./pages/GamePage.jsx";
-// import { DailyPage } from "./pages/GamePage.jsx"; //désactivé tant que useGame sait pas faire le mot du jour
+import GamePage, { DailyPage } from "./pages/GamePage.jsx";
 import "./styles/index.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <header className="header">
+      <header className="header" /*hors de Routes donc affiché sur toutes les pages*/>
         <Link to="/" className="logo">Le Mot Mystère</Link>
       </header>
       <main className="content">
@@ -20,8 +19,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/regles" element={<RulesPage />} />
           <Route path="/scores" element={<ScoresPage />} />
           <Route path="/stats" element={<StatsPage />} />
-          {/* <Route path="/jour" element={<DailyPage />} /> désactivé, voir en haut */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/jour" element={<DailyPage />} />
+          <Route path="*" element={<NotFoundPage />} /*l'étoile = n'importe quelle autre adresse : page introuvable*/ />
         </Routes>
       </main>
     </BrowserRouter>

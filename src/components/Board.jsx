@@ -1,15 +1,14 @@
 //le plateau de jeu : le message, la grille, le clavier à l'écran et le clavier de l'ordi
 import { useEffect } from "react";
-import { WORD_LENGTH, MAX_ATTEMPTS } from "../constants.js";
 
 const KEYBOARD_ROWS = [
   ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"],
   ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"],
   ["ENTER", "W", "X", "C", "V", "B", "N", "DELETE"],
 ];
-const KEY_LABELS = { ENTER: "Entrée", DELETE: "⌫" }; //ce qu'on écrit sur les 2 touches spéciales
+const KEY_LABELS = { ENTER: "Entrée", DELETE: "⌫" };
 
-function usePhysicalKeyboard(onLetter, onDelete, onEnter) { //écoute le clavier de l'ordi pendant la partie
+function usePhysicalKeyboard(onLetter, onDelete, onEnter) {
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.ctrlKey || e.metaKey || e.altKey) return; //on laisse passer les raccourcis du navigateur
@@ -19,7 +18,7 @@ function usePhysicalKeyboard(onLetter, onDelete, onEnter) { //écoute le clavier
       } else if (e.key === "Backspace") {
         onDelete();
       } else if (/^[a-zA-Z]$/.test(e.key)) {
-        onLetter(e.key.toUpperCase()); //que les lettres de A à Z
+        onLetter(e.key.toUpperCase());
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -27,12 +26,12 @@ function usePhysicalKeyboard(onLetter, onDelete, onEnter) { //écoute le clavier
   }, [onLetter, onDelete, onEnter]);
 }
 
-export function Tile({ letter, status, index = 0 }) { //status : correct=vert present=jaune absent=gris, rien si pas validée
+export function Tile({ letter, status, index = 0 }) { //une case de la grille, status : correct=vert present=jaune absent=gris, rien si pas validée
   let className = "tile";
   let style = {};
   if (status) {
     className += " " + status + " flip";
-    style = { animationDelay: index * 0.25 + "s" }; //chaque case se retourne un peu après celle d'avant
+    style = { animationDelay: index * 0.25 + "s" }; //index = place de la case, chacune se retourne un peu après celle d'avant
   } else if (letter) {
     className += " filled";
   }
@@ -43,33 +42,35 @@ export function Tile({ letter, status, index = 0 }) { //status : correct=vert pr
   );
 }
 
-function Row({ word = "", colors = [], extraClass = "" }) {
+function Row({ length, word = "", colors = [], extraClass = "" }) {
   const tiles = [];
-  for (let i = 0; i < WORD_LENGTH; i++) {
+  for (let i = 0; i < length; i++) {
     tiles.push(<Tile key={i} letter={word[i]} status={colors[i]} index={i} />);
   }
   return <div className={"row " + extraClass}>{tiles}</div>;
 }
 
-function Grid({ state }) {
+function Grid({ game }) { //game.maxAttempts lignes de game.wordLength cases
+  const state = game.state;
+  const length = game.wordLength;
   let currentClass = "";
   if (state.isChecking) {
-    currentClass = "checking"; //la ligne clignote pendant la vérification
+    currentClass = "checking";
   } else if (state.errorMessage && state.currentGuess !== "") {
     currentClass = "invalid"; //refusée seulement s'il reste des lettres (dico en panne = mot accepté, ligne vide)
   }
 
   const rows = [];
-  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+  for (let i = 0; i < game.maxAttempts; i++) {
     if (i < state.guesses.length) {
-      rows.push(<Row key={i} word={state.guesses[i].word} colors={state.guesses[i].colors} />);
+      rows.push(<Row key={i} length={length} word={state.guesses[i].word} colors={state.guesses[i].colors} />);
     } else if (i === state.guesses.length) {
-      rows.push(<Row key={"current-" + state.rejectCount} word={state.currentGuess} extraClass={currentClass} />); //la key change à chaque refus = la ligne retremble
+      rows.push(<Row key={"current-" + state.rejectCount} length={length} word={state.currentGuess} extraClass={currentClass} />); //la key change à chaque refus = la ligne retremble
     } else {
-      rows.push(<Row key={i} />);
+      rows.push(<Row key={i} length={length} />);
     }
   }
-  return <div className="grid">{rows}</div>;
+  return <div className="grid" style={{ "--letters": length }}>{rows}</div>; //--letters = le nombre de cases, pour leur taille dans le CSS
 }
 
 function Keyboard({ game }) {
@@ -86,7 +87,7 @@ function Keyboard({ game }) {
           {row.map((value) => {
             let className = "key";
             if (KEY_LABELS[value]) className += " wide";
-            else if (game.keyboardStatuses[value]) className += " " + game.keyboardStatuses[value]; //la couleur de la lettre
+            else if (game.keyboardStatuses[value]) className += " " + game.keyboardStatuses[value];
             return (
               <button
                 type="button"
@@ -107,16 +108,16 @@ function Keyboard({ game }) {
 
 function GameMessage({ state }) { //toujours affiché (même vide) pour que la grille bouge pas
   if (state.isChecking) return <p className="message checking">Vérification du mot...</p>;
-  return <p className="message error">{state.errorMessage}</p>; //mot refusé ou dico en panne
+  return <p className="message error">{state.errorMessage}</p>;
 }
 
-function Board({ game }) { //game=tout ce que renvoie useGame
+function Board({ game }) {
   usePhysicalKeyboard(game.addLetter, game.deleteLetter, game.submitGuess);
   return (
     <>
       <GameMessage state={game.state} />
-      <Grid state={game.state} />
-      <Keyboard game={game} />
+      <Grid game={game} />
+      {game.state.gameStatus === "IN_PROGRESS" && <Keyboard game={game} />}
     </>
   );
 }
