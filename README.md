@@ -1,3 +1,64 @@
+# Le Mot Mystère
+
+**Site en ligne : ADRESSE-VERCEL-À-METTRE-ICI**
+
+Un jeu de mots en React : faut trouver un mot de 5, 6 ou 7 lettres, avec les couleurs vert / jaune / gris après chaque essai. Les mots proposés sont vérifiés avec l'API du Wiktionnaire.
+
+## Le binôme
+
+- **Victor Melwig-Maes** : l'affichage (pages, composants, CSS, navigation). Tout est expliqué dans [AFFICHAGE.md](AFFICHAGE.md).
+- **NOM-DU-BINÔME-À-METTRE-ICI (loulou733)** : la logique du jeu (`src/logic/`, `src/hooks/`, `src/services/`, `src/data/`, les tests). C'est expliqué plus bas, dans « Partie logique ».
+
+## Palier visé
+
+Le palier 5 (les variantes).
+
+## État des paliers
+
+| Palier | État |
+|---|---|
+| 1 - le jeu | fait |
+| 2 - le dictionnaire | fait |
+| 3 - le confort de jeu | fait |
+| 4 - le mot du jour | fait, en ligne sur Vercel |
+| 5 - les variantes | fait |
+| 6 - les quatre grilles | pas fait |
+
+## Installer, lancer et tester
+
+Faut Node.js (testé avec Node 24).
+
+```bash
+npm install      # installer les dépendances
+npm run dev      # lancer le jeu en local sur http://localhost:5173
+npm run lint     # vérifier le code avec oxlint
+npm run build    # construire la version en ligne dans dist/
+npm test         # lancer les tests (vitest)
+```
+
+## Bibliothèques
+
+En plus de React et React Router (demandés dans le sujet) :
+
+- **oxlint** : le linter. Il est beaucoup plus rapide qu'ESLint et il a déjà les règles React (rules-of-hooks).
+- **vitest** : les tests de la logique. Il marche direct avec Vite, sans config en plus.
+
+Tailwind CSS, PostCSS et autoprefixer traînent encore dans le `package.json`, mais ils servent à rien : tout le style est en CSS normal.
+
+## Si le Wiktionnaire répond pas
+
+Si l'API répond pas (panne, pas d'internet, ou plus de 5 secondes d'attente), **le mot est accepté sans vérif**, et le joueur est prévenu par un message.
+
+Si on refusait, la partie serait bloquée tant que l'API est en panne, vu que plus aucun mot pourrait passer. Accepter un mot pas vérifié c'est un moindre mal, et le joueur sait que la vérif a pas eu lieu.
+
+## Les listes de 6 et 7 lettres
+
+LISTES-À-METTRE-ICI : comment les listes `mots-solutions-6.json` (405 mots) et `mots-solutions-7.json` (349 mots) ont été faites.
+
+## L'affichage
+
+Voir [AFFICHAGE.md](AFFICHAGE.md) : les écrans, mes choix côté affichage et les galères.
+
 ## Partie logique (loulou733)
 
 Je me suis occupé de toute la logique du jeu : les règles, l'état de la partie, la sauvegarde
