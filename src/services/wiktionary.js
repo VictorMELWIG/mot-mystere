@@ -1,7 +1,6 @@
 import { normalizeWord } from '../logic/rules.js';
 import { WIKTIONARY_API_URL, WIKTIONARY_PAGE_URL, API_USER_AGENT, API_TIMEOUT_MS } from '../config.js';
 
-// Pose une question au Wiktionnaire (origin=* sinon le navigateur bloque la réponse)
 async function askWiktionary(question) {
   const url = WIKTIONARY_API_URL + '?' + question + '&format=json&formatversion=2&origin=*';
 
@@ -17,7 +16,6 @@ async function askWiktionary(question) {
   return response.json();
 }
 
-// Vrai si le mot existe sur le Wiktionnaire (sans tenir compte des accents) dans la catégorie « français »
 export async function isFrenchWord(guess) {
   const searchResult = await askWiktionary('action=query&list=search&srlimit=10&srsearch=' + guess);
 
@@ -45,7 +43,6 @@ export async function isFrenchWord(guess) {
   return false;
 }
 
-// Adresse de la page Wiktionnaire d'un mot
 export function getWiktionaryUrl(word) {
   return WIKTIONARY_PAGE_URL + word;
 }

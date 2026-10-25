@@ -1,5 +1,4 @@
-import { evaluateGuess, isValidWord, normalizeWord } from './rules.js';
-import { MAX_ATTEMPTS } from '../constants.js';
+import { evaluateGuess, normalizeWord, getMaxAttempts } from './rules.js';
 
 export const ACTIONS = {
   ADD_LETTER: 'ADD_LETTER',
@@ -21,10 +20,9 @@ export const initialGameState = {
   rejectCount: 0,
   startedAt: 0,
   endedAt: 0,
-  day: '', // le jour du mot du jour ("2026-10-24"), vide en partie libre
+  day: '',
 };
 
-// Renvoie le nouvel état de la partie selon l'action reçue
 export function gameReducer(state, action) {
   switch (action.type) {
     case ACTIONS.ADD_LETTER:
@@ -58,18 +56,13 @@ export function gameReducer(state, action) {
     case ACTIONS.SUBMIT_GUESS: {
       if (state.gameStatus !== 'IN_PROGRESS') return state;
 
-      const validation = isValidWord(state.currentGuess, state.targetWord.length);
-      if (!validation.valid) {
-        return { ...state, isChecking: false, errorMessage: validation.reason, rejectCount: state.rejectCount + 1 };
-      }
-
       const colors = evaluateGuess(state.currentGuess, state.targetWord);
       const newGuesses = [...state.guesses, { word: state.currentGuess, colors }];
 
       let newGameStatus = state.gameStatus;
       if (state.currentGuess === state.targetWord) {
         newGameStatus = 'WON';
-      } else if (newGuesses.length >= MAX_ATTEMPTS) {
+      } else if (newGuesses.length >= getMaxAttempts(state.targetWord.length)) {
         newGameStatus = 'LOST';
       }
 

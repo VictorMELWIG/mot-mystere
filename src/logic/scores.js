@@ -1,13 +1,13 @@
 import { MAX_ATTEMPTS } from '../constants.js';
 import { getTodayKey } from './dailyWord.js';
 
-// Les 10 meilleures parties gagnées, par points puis par date (la plus ancienne devant)
-export function getTopScores(games) {
+export function getTopScores(games, wordLength = null, hardMode = null) {
   const wonGames = [];
   for (const game of games) {
-    if (game.won) {
-      wonGames.push(game);
-    }
+    if (!game.won) continue;
+    if (wordLength !== null && game.wordLength !== wordLength) continue;
+    if (hardMode !== null && game.hardMode !== hardMode) continue;
+    wonGames.push(game);
   }
 
   wonGames.sort((a, b) => {
@@ -20,7 +20,6 @@ export function getTopScores(games) {
   return wonGames.slice(0, 10);
 }
 
-// Le classement du mot du jour : les parties gagnées aujourd'hui, par points puis par temps (le plus rapide devant)
 export function getDailyScores(games, todayKey = getTodayKey()) {
   const todayGames = [];
   for (const game of games) {
@@ -39,7 +38,6 @@ export function getDailyScores(games, todayKey = getTodayKey()) {
   return todayGames.slice(0, 10);
 }
 
-// Statistiques d'un joueur : parties, % de victoires, séries, points et répartition des essais
 export function getStats(games, pseudo) {
   let played = 0;
   let wins = 0;
@@ -62,7 +60,7 @@ export function getStats(games, pseudo) {
 
     if (game.won) {
       wins = wins + 1;
-      distribution[game.attempts] = distribution[game.attempts] + 1;
+      distribution[game.attempts] = (distribution[game.attempts] || 0) + 1;
       currentStreak = currentStreak + 1;
       if (currentStreak > bestStreak) {
         bestStreak = currentStreak;

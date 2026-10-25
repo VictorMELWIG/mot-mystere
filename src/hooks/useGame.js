@@ -1,6 +1,14 @@
 import { useReducer, useEffect, useMemo } from 'react';
 import { gameReducer, initialGameState, ACTIONS } from '../logic/gameReducer.js';
-import { getRandomWord, getKeyboardStatuses, calculateScore, isValidWord } from '../logic/rules.js';
+import {
+  getRandomWord,
+  getKeyboardStatuses,
+  calculateScore,
+  isValidWord,
+  checkHardMode,
+  getMaxAttempts,
+  WORD_LENGTHS,
+} from '../logic/rules.js';
 import { getTodayKey, getDailyWord } from '../logic/dailyWord.js';
 import { isFrenchWord, getWiktionaryUrl } from '../services/wiktionary.js';
 import { saveGame, loadDailyGame, saveDailyGame } from '../services/gamesStorage.js';
@@ -11,7 +19,6 @@ function getPseudo() {
   return localStorage.getItem('pseudo') || 'Joueur';
 }
 
-// La partie au chargement de la page : en mot du jour, on reprend celle d'aujourd'hui si elle existe
 function createStartState(daily, wordList) {
   if (daily) {
     const todayKey = getTodayKey();
@@ -25,14 +32,18 @@ function createStartState(daily, wordList) {
   return gameReducer(initialGameState, { type: ACTIONS.SET_WORD, payload: getRandomWord(wordList) });
 }
 
-// Toute la partie (état, couleurs, points) et les fonctions pour jouer, prêtes pour l'affichage
-// daily = true pour le mot du jour, false pour une partie libre
-export function useGame(daily = false, wordList = WORD_LISTS[WORD_LENGTH]) {
+export function useGame(daily = false, wordLength = WORD_LENGTH, hardMode = false) {
+  let length = Number(wordLength);
+  if (daily || !WORD_LENGTHS.includes(length)) {
+    length = WORD_LENGTH;
+  }
+  const wordList = WORD_LISTS[length];
+
   const [state, dispatch] = useReducer(gameReducer, null, () => createStartState(daily, wordList));
 
-  const keyboardStatuses = useMemo(() => getKeyboardStatuses(state.guesses), [state.guesses]);
+  const keyboardStatuses = getKeyboardStatuses(state.guesses);
 
-  const score = calculateScore(state.guesses.length, state.gameStatus === 'WON');
+  const score = calculateScore(state.guesses.length, state.gameStatus === 'WON', state.targetWord.length, hardMode);
 
   const gameResult = useMemo(() => {
     if (state.gameStatus === 'IN_PROGRESS') return null;
@@ -42,22 +53,20 @@ export function useGame(daily = false, wordList = WORD_LISTS[WORD_LENGTH]) {
       points: score,
       won: state.gameStatus === 'WON',
       date: state.endedAt,
-      duration: Math.round((state.endedAt - state.startedAt) / 1000), // en secondes
+      duration: Math.round((state.endedAt - state.startedAt) / 1000),
       wordLength: state.targetWord.length,
-      hardMode: false,
+      hardMode: hardMode,
       daily: daily,
       day: state.day,
     };
-  }, [state.gameStatus, state.solution, state.guesses.length, score, state.endedAt, state.startedAt, state.targetWord.length, daily, state.day]);
+  }, [state, score, hardMode, daily]);
 
-  // Dès que la partie est finie, on l'enregistre pour le tableau des scores et les statistiques
   useEffect(() => {
     if (gameResult) {
       saveGame({ ...gameResult, pseudo: getPseudo() });
     }
   }, [gameResult]);
 
-  // Mot du jour : on garde la partie à chaque coup pour la reprendre si la page est rechargée
   useEffect(() => {
     if (daily) {
       saveDailyGame(getPseudo(), state.day, state);
@@ -85,6 +94,14 @@ export function useGame(daily = false, wordList = WORD_LISTS[WORD_LENGTH]) {
       return;
     }
 
+    if (hardMode) {
+      const hardCheck = checkHardMode(state.currentGuess, state.guesses);
+      if (!hardCheck.valid) {
+        dispatch({ type: ACTIONS.REJECT_GUESS, payload: hardCheck.reason });
+        return;
+      }
+    }
+
     dispatch({ type: ACTIONS.START_CHECK });
 
     try {
@@ -104,6 +121,8 @@ export function useGame(daily = false, wordList = WORD_LISTS[WORD_LENGTH]) {
     keyboardStatuses,
     score,
     gameResult,
+    wordLength: state.targetWord.length,
+    maxAttempts: getMaxAttempts(state.targetWord.length),
     solutionUrl: getWiktionaryUrl(state.solution),
     addLetter,
     deleteLetter,
