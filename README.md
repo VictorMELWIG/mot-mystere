@@ -8,7 +8,7 @@ Voici tout ce que j'ai fait depuis le 23/10.
 - J'ai regroupé la logique dans quelques fichiers seulement, pour que ce soit plus simple à suivre :
   `rules.js` (accents, couleurs, points, mode difficile), `scores.js` (classements et statistiques)
   et `gameReducer.js` (état de la partie).
-- J'ai sorti les réglages de l'API du Wiktionnaire (adresse, en-tête `Api-User-Agent`, délai maximum)
+- J'ai sorti les réglages de l'API du Wiktionnaire
   dans `config.js`, pour les avoir à un seul endroit.
 - J'ai supprimé les anciens petits fichiers qui ne servaient plus.
 
